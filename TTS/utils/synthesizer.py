@@ -285,6 +285,7 @@ class Synthesizer(nn.Module):
         """
         start_time = time.time()
         wavs = []
+        verbose = kwargs.pop("verbose", True)
 
         if not text and not reference_wav:
             raise ValueError(
@@ -294,9 +295,11 @@ class Synthesizer(nn.Module):
         if text:
             sens = [text]
             if split_sentences:
-                print(" > Text splitted to sentences.")
+                if verbose:
+                    print(" > Text splitted to sentences.")
                 sens = self.split_into_sentences(text)
-            print(sens)
+            if verbose:
+                print(sens)
 
         # handle multi-speaker
         if "voice_dir" in kwargs:
@@ -497,9 +500,10 @@ class Synthesizer(nn.Module):
                 waveform = waveform.numpy()
             wavs = waveform.squeeze()
 
-        # compute stats
-        process_time = time.time() - start_time
-        audio_time = len(wavs) / self.tts_config.audio["sample_rate"]
-        print(f" > Processing time: {process_time}")
-        print(f" > Real-time factor: {process_time / audio_time}")
+        if verbose:
+            # compute stats
+            process_time = time.time() - start_time
+            audio_time = len(wavs) / self.tts_config.audio["sample_rate"]
+            print(f" > Processing time: {process_time}")
+            print(f" > Real-time factor: {process_time / audio_time}")
         return wavs
